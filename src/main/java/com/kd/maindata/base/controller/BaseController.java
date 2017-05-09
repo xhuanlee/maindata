@@ -1,10 +1,10 @@
 package com.kd.maindata.base.controller;
 
 import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -22,10 +22,8 @@ import java.util.Map;
  */
 public class BaseController {
 
-    @Autowired
     HttpServletRequest request;
 
-    @Autowired
     HttpServletResponse response;
 
     private ModelAndView modelAndView;
@@ -35,6 +33,22 @@ public class BaseController {
     public static final String SUCCESS = "success";
 
     public static final String FAILURE = "failure";
+
+    @InitBinder
+    protected void initBinder(WebDataBinder binder) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss");
+        // 注册自定义属性编辑器
+        binder.registerCustomEditor(Date.class, new CustomDateEditor(
+                dateFormat, true));
+    }
+
+    @ModelAttribute
+    public void setReqAndRes(HttpServletRequest request,
+                             HttpServletResponse response) {
+        this.request = request;
+        this.response = response;
+    }
 
     public HttpServletRequest getRequest() {
         return request;
@@ -48,14 +62,6 @@ public class BaseController {
         return getRequest() == null ? null : getRequest().getSession();
     }
 
-    @InitBinder
-    protected void initBinder(WebDataBinder binder) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(
-                "yyyy-MM-dd HH:mm:ss");
-        // 注册自定义属性编辑器
-        binder.registerCustomEditor(Date.class, new CustomDateEditor(
-                dateFormat, true));
-    }
 
     public String saveFile(MultipartFile file, String path, String fileName) throws Exception {
         // 文件名前加上时间戳
